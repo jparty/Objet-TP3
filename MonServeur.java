@@ -4,13 +4,12 @@
  */
 package messagerie;
 
-import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,24 +19,24 @@ import java.util.logging.Logger;
  * @author jules
  */
 public class MonServeur extends UnicastRemoteObject implements MonServeurInterface {
-    
+
     private Map<String, String> listId;
-    private Map<Integer, String> listeMessage;
-    private static int ID = 0;
-    
+    private List<String> listeMessage;
+
     public MonServeur() throws RemoteException {
         super();
         listId = new HashMap<>();
-        listeMessage = new HashMap<>();
+        listeMessage = new ArrayList<>();
     }
 
     @Override
-    public void connectClient(String identifiant) throws RemoteException {
+    public int connectClient(String identifiant) throws RemoteException {
         try {
             listId.put(getClientHost(), identifiant);
         } catch (ServerNotActiveException ex) {
             Logger.getLogger(MonServeur.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return listeMessage.size();
     }
 
     @Override
@@ -51,30 +50,39 @@ public class MonServeur extends UnicastRemoteObject implements MonServeurInterfa
 
     @Override
     public String who() throws RemoteException {
-        String result = "";
-        for (Object o : listId.values().toArray()) {
-            result = result + o.toString() + "\n";
+        String result;
+        Object[] listIdArray = listId.values().toArray();
+        if (listIdArray.length == 0) {
+            result = "Aucun utilisateur connecté.\n";
+        } else {
+            result = "Voici la liste des utilisateurs connectés :\n";
+            for (Object o : listId.values().toArray()) {
+                result = result + o.toString() + "\n";
+            }
         }
         return result;
     }
 
     @Override
-    public void envoiMessage(String message) throws RemoteException {
+    public boolean envoiMessage(String message) throws RemoteException {
         try {
-            listeMessage.put(ID, listId.get(getClientHost()) + " : " + message);
-            ID++;
+            if (listId.containsKey(getClientHost())) {
+                listeMessage.add(listId.get(getClientHost()) + " : " + message + "\n");
+                return true;
+            }
         } catch (ServerNotActiveException ex) {
             Logger.getLogger(MonServeur.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-    
-    @Override
-    public String getMessage(int index) throws RemoteException {
-        String result = "";
-        for (int i = index; i<ID;i++) {
-            result = result + listeMessage.get(i) + "\n";
-        }
-        return result;
+        return false;
     }
 
+    @Override
+    public String getMessage(int index) throws RemoteException {
+        try {
+            return listeMessage.get(index);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+
+    }
 }

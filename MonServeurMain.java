@@ -4,7 +4,6 @@
  */
 package messagerie;
 
-import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
@@ -30,7 +29,6 @@ public class MonServeurMain {
 
             // create and publish car factory server object
             MonServeur serveur1 = new MonServeur();
-            //String URL = "//"+InetAddress.getLocalHost().getHostName()+":"+1099+"/monServeur";
             r.rebind("monServeur", serveur1);
         } catch (Exception e) {
             e.printStackTrace();

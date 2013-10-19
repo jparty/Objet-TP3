@@ -13,13 +13,13 @@ import java.rmi.RemoteException;
  */
 public interface MonServeurInterface extends Remote {
     
-    public void connectClient(String identifiant) throws RemoteException;
+    public int connectClient(String identifiant) throws RemoteException;
     
     public void deconnectClient() throws RemoteException;
     
     public String who() throws RemoteException;
     
-    public void envoiMessage(String message) throws RemoteException;
+    public boolean envoiMessage(String message) throws RemoteException;
     
     public String getMessage(int index) throws RemoteException;
 }
